@@ -148,6 +148,24 @@
             opacity: 0.5;
             cursor: not-allowed;
         }
+
+        .file-controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            align-items: flex-start;  /* Aligns items to top */
+            height: 40px;  /* Fixed height for the container */
+        }
+
+        .file-controls button {
+            height: 40px;  /* Fixed height for buttons */
+            padding: 0 20px;  /* Horizontal padding only */
+            flex-shrink: 0;  /* Prevents button from shrinking */
+        }
+
+        .file-controls input[type="file"] {
+            height: 40px;  /* Fixed height for file input */
+        }
     </style>
 </head>
 <body>
