@@ -82,17 +82,29 @@
             display: none;
             position: fixed;
             z-index: 1000;
-            width: 250px;
+            min-width: 200px;
+            max-width: 400px; /* Maximum width before wrapping */
+            width: auto; /* Allow width to adjust to content */
             background-color: #00001d;
             text-align: left;
-            padding: 10px;
+            padding: 15px;
             border-style: groove;
             border-radius: 1px;
             border-color: white;
             font-size: 14px;
-            line-height: 1.4;
+            line-height: 1.6;
             pointer-events: none;
             box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+            word-wrap: break-word; /* Enable word wrapping */
+            white-space: pre-wrap; /* Preserve whitespace and wrapping */
+        }
+
+        .tooltip strong {
+            display: block; /* Put character name on its own line */
+            margin-bottom: 8px;
+            font-size: 16px;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+            padding-bottom: 4px;
         }
 
         .roster-slot:hover .tooltip {
