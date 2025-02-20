@@ -222,22 +222,22 @@
 
     <script>
         const hoverSound = new Audio('click2.mp3');
-        const SLOTS = 50;
-        const roster = Array(SLOTS).fill(null);
+        let roster = [];
         const debug = document.getElementById('debug');
         
         function initializeRoster() {
-            const grid = document.getElementById('rosterGrid');
-            grid.innerHTML = '';
-            
-            for (let i = 0; i < SLOTS; i++) {
-                const slot = document.createElement('div');
-                slot.className = 'roster-slot';
-                slot.dataset.index = i;
-                slot.addEventListener('mousemove', handleTooltipPosition);
-                grid.appendChild(slot);
+            extendRosterToFitPage(0);
+        }
+
+        function extendRosterToFitPage(pageNumber) {
+            const requiredSlots = (pageNumber + 1) * SLOTS_PER_PAGE;
+            if (roster.length < requiredSlots) {
+                // Add null slots until we reach required length
+                while (roster.length < requiredSlots) {
+                    roster.push(null);
+                }
+                updateDebug(`Extended roster to ${requiredSlots} slots`);
             }
-            updateDebug("Roster initialized with " + SLOTS + " empty slots");
         }
 
         function handleTooltipPosition(e) {
@@ -260,6 +260,7 @@
             }
         }
 
+        
         function addCharacter() {
             const name = document.getElementById('characterName').value;
             const imageUrl = document.getElementById('imageUrl').value;
@@ -273,14 +274,9 @@
                 return;
             }
 
+            // Find first empty slot in entire roster
             const index = roster.findIndex(slot => slot === null);
             updateDebug(`Found empty slot at index: ${index}`);
-
-            if (index === -1) {
-                updateDebug("Error: No empty slots available");
-                alert('Roster is full!');
-                return;
-            }
 
             const character = {
                 name,
@@ -288,9 +284,14 @@
                 description
             };
 
-            roster[index] = character;
-            updateSlot(index);
-            
+            if (index === -1) {
+                // No empty slots found, extend roster
+                roster.push(character);
+                updateDebug("Added new slot to roster");
+            } else {
+                roster[index] = character;
+            }
+
             // Clear inputs
             document.getElementById('characterName').value = '';
             document.getElementById('imageUrl').value = '';
@@ -299,7 +300,7 @@
             updatePagination();
             saveRoster();
         }
-
+        
         function updateSlot(index) {
             const slot = document.querySelector(`[data-index="${index}"]`);
             
@@ -404,7 +405,7 @@
             updatedRoster.forEach((character, index) => {
                 const slot = document.createElement('div');
                 slot.className = 'roster-slot';
-                slot.dataset.index = index;
+                slot.dataset.index = index + (currentPage * SLOTS_PER_PAGE); // Adjust index for current page
                 if (character) {
                     slot.innerHTML = `
                         <img src="${character.imageUrl}" alt="${character.name}">
@@ -412,6 +413,10 @@
                             <strong>${character.name}:</strong> ${character.description}
                         </div>
                     `;
+                    slot.addEventListener('mouseenter', () => {
+                        hoverSound.currentTime = 0;
+                        hoverSound.play();
+                    });
                 }
                 slot.addEventListener('mousemove', handleTooltipPosition);
                 grid.appendChild(slot);
@@ -422,7 +427,12 @@
         let currentPage = 0;
 
         function updatePagination() {
-            const totalPages = Math.ceil((roster.filter(slot => slot !== null).length + 1) / SLOTS_PER_PAGE);
+            const filledSlots = roster.filter(slot => slot !== null).length;
+            const totalPages = Math.ceil(filledSlots / SLOTS_PER_PAGE) + 1; // Always show one empty page
+    
+            // Make sure roster array is big enough for current page
+            extendRosterToFitPage(currentPage);
+    
             const startIdx = currentPage * SLOTS_PER_PAGE;
             const endIdx = startIdx + SLOTS_PER_PAGE;
     
